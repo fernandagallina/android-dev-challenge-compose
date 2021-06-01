@@ -19,20 +19,24 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.androiddevchallenge.model.Recipe
 import com.example.androiddevchallenge.model.RecipesDataGenerator
+import com.example.androiddevchallenge.model.RecipesListViewModel
 import com.example.androiddevchallenge.ui.theme.DarkGray
 import com.example.androiddevchallenge.ui.theme.MyTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 
 /**
  * Main task screen composable
  */
 @Composable
-fun RecipesListScreen() {
+fun RecipesListScreen(viewModel: RecipesListViewModel) {
     Column {
-        val emptyView = true
-        if (emptyView) {
+        val recipesList: List<Recipe> by viewModel.list.observeAsState(emptyList())
+        val isEmptyView = recipesList.isEmpty()
+        if (isEmptyView) {
             EmptyView(Modifier.weight(1f))
         } else {
-            RecipeListView(Modifier.weight(1f))
+            RecipeListView(recipesList, Modifier.weight(1f))
         }
 
         BottomView()
@@ -43,12 +47,12 @@ fun RecipesListScreen() {
  * Displays list of recipes
  */
 @Composable
-fun RecipeListView(modifier: Modifier) {
+fun RecipeListView(recipesList: List<Recipe>, modifier: Modifier) {
     LazyColumn(
         modifier = modifier.background(DarkGray)
     ) {
-        items(0) {
-            RecipeCard()
+        items(recipesList.size) {
+            RecipeCard(recipesList[it])
             Spacer(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -78,7 +82,7 @@ fun AddButton() {
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RecipeCard(onClick: () -> Unit = {}) {
+fun RecipeCard(recipe: Recipe, onClick: () -> Unit = {}) {
     Card(
         Modifier
             .padding(horizontal = 16.dp)
@@ -90,11 +94,6 @@ fun RecipeCard(onClick: () -> Unit = {}) {
                 onClick = {}
             )
     ) {
-        val recipe = Recipe(
-            name = RecipesDataGenerator.names.random(),
-            price = RecipesDataGenerator.randomPrice,
-            color = RecipesDataGenerator.randomColor
-        )
         Row(
             Modifier
                 .padding(16.dp)
@@ -214,7 +213,7 @@ fun ComponentsPreview() {
     MyTheme {
         Surface {
             Column {
-                RecipeCard()
+                RecipeCard(RecipesDataGenerator.generateRecipes(1).first())
                 Spacer(modifier = Modifier.size(8.dp))
                 ConfirmDeletionCard()
             }
@@ -222,10 +221,10 @@ fun ComponentsPreview() {
     }
 }
 
-@Preview
-@Composable
-fun ScreenPreview() {
-    MyTheme {
-        RecipesListScreen()
-    }
-}
+//@Preview
+//@Composable
+//fun ScreenPreview() {
+//    MyTheme {
+//        RecipesListScreen()
+//    }
+//}
