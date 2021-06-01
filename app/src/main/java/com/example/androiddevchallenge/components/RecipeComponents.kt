@@ -1,5 +1,6 @@
 package com.example.androiddevchallenge.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -57,29 +58,6 @@ fun RecipePrice(
             .width(52.dp),
         style = MaterialTheme.typography.subtitle2.copy(fontStyle = FontStyle.Italic)
     )
-}
-
-/**
- * Static box with Price + Button
- */
-@Composable
-fun BottomView() {
-    Column {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-        ) {
-            Text(
-                text = "Total price",
-                modifier = Modifier.weight(1f),
-                color = MaterialTheme.colors.onSurface
-            )
-            Text(text = "$ X", color = MaterialTheme.colors.onSurface)
-        }
-        AddButton()
-    }
-
 }
 
 @Composable

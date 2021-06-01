@@ -32,6 +32,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.initListener(this)
         setContent {
             MyTheme {
                 MyApp(viewModel)
