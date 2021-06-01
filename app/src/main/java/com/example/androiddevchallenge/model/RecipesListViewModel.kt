@@ -28,7 +28,10 @@ class RecipesListViewModel : ViewModel() {
     }
 
     fun addRecipe() {
-        val newRecipe = RecipesDataGenerator.generateRecipes(1).first()
+        val color = getNewRecipeColor()
+        val newRecipe = RecipesDataGenerator.generateRecipe(
+            color = color
+        )
         val newList = _list.value?.toMutableList()
         newList?.add(newRecipe)
         _list.value = newList
@@ -56,4 +59,10 @@ class RecipesListViewModel : ViewModel() {
 
         return sum
     }
+
+    private fun getNewRecipeColor() =
+        if(_color.value == Color.Unspecified)
+            RecipesDataGenerator.randomColor
+        else
+            _color.value ?: RecipesDataGenerator.randomColor
 }
