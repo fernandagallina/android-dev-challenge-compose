@@ -1,5 +1,6 @@
 package com.example.androiddevchallenge.model
 
+import android.graphics.Color
 import androidx.lifecycle.*
 
 class RecipesListViewModel : ViewModel() {
@@ -17,6 +18,10 @@ class RecipesListViewModel : ViewModel() {
         _list.observe(lifecycleOwner){
             _price.value = getRecipesPrice(list.value)
         }
+    }
+
+    fun filterRecipe(color: Color) {
+
     }
 
     fun addRecipe(){

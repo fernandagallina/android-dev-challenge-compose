@@ -1,8 +1,10 @@
 package com.example.androiddevchallenge.components
 
+import androidx.annotation.ColorRes
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -37,6 +39,7 @@ fun RecipesListScreen(viewModel: RecipesListViewModel) {
         if (isEmptyView) {
             EmptyView(Modifier.weight(1f))
         } else {
+            ColorFilter(onColorClick = { /* */ })
             RecipeListView(
                 recipesList = recipesList,
                 modifier = Modifier.weight(1f),
@@ -67,14 +70,16 @@ fun RecipeListView(
         modifier = modifier.background(DarkGray)
     ) {
         items(
-            count = recipesList.size
+            count = recipesList.size,
+            key = {
+                recipesList[it].id
+            }
         ) { item ->
             val recipe = recipesList[item]
 
             var isInEditableMode by rememberSaveable(
                 key = recipe.id.toString()
             ) { mutableStateOf(false) }
-
 
             if (isInEditableMode) {
                 ConfirmDeletionCard(
@@ -239,7 +244,8 @@ fun ColorView(color: Color, modifier: Modifier) {
  * Use this view for Bonus task
  */
 @Composable
-fun ColorFilter() {
+fun ColorFilter(onColorClick: (Color) -> Unit = {}) {
+    var selectedColor by remember { mutableStateOf(Color.Unspecified) }
     Row(
         Modifier
             .background(DarkGray)
@@ -247,21 +253,45 @@ fun ColorFilter() {
     ) {
         Spacer(modifier = Modifier.weight(1f))
         RecipesDataGenerator.colors.forEach { color ->
-            ColorView3(color = color)
+            ColorView3(
+                selectedColor = selectedColor,
+                color = color,
+                onColorClick = {
+                    onColorClick.invoke(it)
+                    selectedColor = it
+                }
+            )
             Spacer(modifier = Modifier.weight(1f))
         }
     }
 }
 
 @Composable
-fun ColorView3(color: Color, modifier: Modifier = Modifier) {
+fun ColorView3(
+    selectedColor: Color,
+    color: Color,
+    modifier: Modifier = Modifier,
+    onColorClick: (Color) -> Unit
+) {
     Spacer(
         modifier = modifier
             .width(64.dp)
             .height(24.dp)
-            .background(color, shape = RoundedCornerShape(12.dp))
+            .background(color = getColor(selectedColor, color), shape = RoundedCornerShape(12.dp))
+            .clickable {
+                onColorClick.invoke(
+                    if (selectedColor == color) {
+                        Color.Unspecified
+                    } else {
+                        color
+                    }
+                )
+            }
     )
 }
+
+fun getColor(selectedColor: Color, baseColor: Color) =
+    baseColor.copy(alpha = if (baseColor == selectedColor) 1F else 0.5F)
 
 @Preview
 @Composable
