@@ -12,6 +12,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -28,15 +29,9 @@ import com.example.androiddevchallenge.ui.theme.DarkGray
 import com.example.androiddevchallenge.ui.theme.MyTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.layout.LayoutModifier
-import androidx.compose.ui.layout.Measurable
-import androidx.compose.ui.layout.MeasureScope
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.dynamicanimation.animation.FlingAnimation
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -47,6 +42,8 @@ import kotlin.math.roundToInt
 @Composable
 fun RecipesListScreen(viewModel: RecipesListViewModel) {
     Column {
+        val listState = rememberLazyListState()
+        val coroutineScope = rememberCoroutineScope()
         val recipesList: List<Recipe> by viewModel.list.observeAsState(emptyList())
         val recipesPrice by viewModel.price.observeAsState(0.0)
         val color by viewModel.color.observeAsState(Color.Unspecified)
@@ -63,11 +60,16 @@ fun RecipesListScreen(viewModel: RecipesListViewModel) {
                 modifier = Modifier.weight(1f),
                 onDelete = {
                     viewModel.deleteRecipe(it)
-                }
+                },
+//                listState = listState
             )
         }
         BottomView(recipesPrice, onAddClick = {
             viewModel.addRecipe()
+            coroutineScope.launch {
+                listState.animateScrollToItem(index = filteredRecipe.lastIndex)
+            }
+
         })
     }
 }
@@ -79,12 +81,12 @@ fun RecipesListScreen(viewModel: RecipesListViewModel) {
 fun RecipeListView(
     recipesList: List<Recipe>,
     onDelete: (id: Int) -> Unit = {},
-    modifier: Modifier
+    modifier: Modifier,
+    listState: LazyListState = rememberLazyListState()
 ) {
-    val listState = rememberLazyListState()
     LazyColumn(
         state = listState,
-        modifier = modifier.background(DarkGray)
+        modifier = modifier.background(DarkGray),
     ) {
         items(
             count = recipesList.size,
