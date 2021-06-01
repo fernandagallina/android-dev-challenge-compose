@@ -1,12 +1,15 @@
 package com.example.androiddevchallenge.components
 
+import android.util.Log
 import androidx.annotation.ColorRes
 import androidx.compose.animation.*
 import androidx.compose.animation.core.TweenSpec
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.gestures.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -27,6 +30,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.layout.LayoutModifier
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasureScope
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.dynamicanimation.animation.FlingAnimation
+import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /**
  * Main task screen composable
@@ -101,7 +113,11 @@ fun RecipeListView(
                 RecipeCard(recipe,
                     onLongClick = {
                         isInEditableMode = true
-                    })
+                    },
+                    onSwiped = {
+                        onDelete.invoke(recipe.id)
+                    }
+                )
             }
 
             Spacer(
@@ -171,7 +187,9 @@ fun AddButton(onClick: () -> Unit) {
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun RecipeCard(recipe: Recipe, onLongClick: () -> Unit = {}) {
+fun RecipeCard(recipe: Recipe, onLongClick: () -> Unit = {}, onSwiped: () -> Unit = {}) {
+    var offsetX by remember { mutableStateOf(0f) }
+
     Card(
         Modifier
             .padding(horizontal = 16.dp)
@@ -181,6 +199,23 @@ fun RecipeCard(recipe: Recipe, onLongClick: () -> Unit = {}) {
                     onLongClick.invoke()
                 },
                 onClick = {}
+            )
+            .offset { IntOffset(offsetX.roundToInt(), 0) }
+            .draggable(
+                state = rememberDraggableState {
+                    offsetX += it
+                    Log.d("RecipeCard", "DraggableState it = $it")
+                },
+                orientation = Orientation.Horizontal,
+                onDragStopped = {
+                    if (abs(offsetX) < 100) {
+                        offsetX = 0f
+                    } else {
+                        onSwiped.invoke()
+                    }
+
+                    Log.d("RecipeCard", "onDragStopped stop - offset $offsetX")
+                }
             )
     ) {
         Row(
@@ -296,7 +331,10 @@ fun ColorView3(
         modifier = modifier
             .width(64.dp)
             .height(24.dp)
-            .background(color = getColor(selectedColor, color), shape = RoundedCornerShape(12.dp))
+            .background(
+                color = getColor(selectedColor, color),
+                shape = RoundedCornerShape(12.dp)
+            )
             .clickable {
                 onColorClick.invoke(
                     if (selectedColor == color) {
