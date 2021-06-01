@@ -44,7 +44,7 @@ fun RecipesListScreen(viewModel: RecipesListViewModel) {
                 viewModel.setColor(it)
             })
             RecipeListView(
-                recipesList = recipesList.filter { filterColors(it, color) },
+                recipesList = recipesList.filter { viewModel.filterColors(it, color) },
                 modifier = Modifier.weight(1f),
                 onDelete = {
                     viewModel.deleteRecipe(it)
@@ -57,13 +57,6 @@ fun RecipesListScreen(viewModel: RecipesListViewModel) {
         })
     }
 }
-
-private fun filterColors(recipe: Recipe, selectedColor: Color) =
-    if (selectedColor == Color.Unspecified) {
-        true
-    } else {
-        recipe.color == selectedColor
-    }
 
 /**
  * Displays list of recipes
