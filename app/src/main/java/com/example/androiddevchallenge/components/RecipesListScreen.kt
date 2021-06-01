@@ -1,7 +1,8 @@
 package com.example.androiddevchallenge.components
 
 import androidx.annotation.ColorRes
-import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.*
+import androidx.compose.animation.core.TweenSpec
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -30,28 +31,29 @@ import androidx.compose.runtime.saveable.rememberSaveable
 /**
  * Main task screen composable
  */
+@ExperimentalAnimationApi
 @Composable
 fun RecipesListScreen(viewModel: RecipesListViewModel) {
     Column {
         val recipesList: List<Recipe> by viewModel.list.observeAsState(emptyList())
         val recipesPrice by viewModel.price.observeAsState(0.0)
         val color by viewModel.color.observeAsState(Color.Unspecified)
-        val isEmptyView = recipesList.isEmpty()
+        val filteredRecipe = recipesList.filter { viewModel.filterColors(it, color) }
+        val isEmptyView = filteredRecipe.isEmpty()
+        ColorFilter(onColorClick = {
+            viewModel.setColor(it)
+        })
         if (isEmptyView) {
             EmptyView(Modifier.weight(1f))
         } else {
-            ColorFilter(onColorClick = {
-                viewModel.setColor(it)
-            })
             RecipeListView(
-                recipesList = recipesList.filter { viewModel.filterColors(it, color) },
+                recipesList = filteredRecipe,
                 modifier = Modifier.weight(1f),
                 onDelete = {
                     viewModel.deleteRecipe(it)
                 }
             )
         }
-
         BottomView(recipesPrice, onAddClick = {
             viewModel.addRecipe()
         })
@@ -114,22 +116,36 @@ fun RecipeListView(
 /**
  * Static box with Price + Button
  */
+@ExperimentalAnimationApi
 @Composable
 fun BottomView(price: Double = 0.0, onAddClick: () -> Unit = {}) {
     Column {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+        AnimatedVisibility(
+            visible = (price != 0.0),
+            enter = slideInVertically(
+                initialOffsetY = { -40 },
+            ) + expandVertically(
+                expandFrom = Alignment.Top
+            ) + fadeIn(initialAlpha = 0.3f),
+            exit = slideOutVertically(targetOffsetY = { 40 })
+                    + shrinkVertically(shrinkTowards = Alignment.Bottom)
+                    + fadeOut(targetAlpha = 0.3f)
         ) {
-            Text(
-                text = "Total price",
-                modifier = Modifier.weight(1f),
-                color = MaterialTheme.colors.onSurface
-            )
-            Text(
-                text = String.format("$ %.2f", price / 100), color = MaterialTheme.colors.onSurface
-            )
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Text(
+                    text = "Total price",
+                    modifier = Modifier.weight(1f),
+                    color = MaterialTheme.colors.onSurface
+                )
+                Text(
+                    text = String.format("$ %.2f", price / 100),
+                    color = MaterialTheme.colors.onSurface
+                )
+            }
         }
         AddButton(onAddClick)
     }

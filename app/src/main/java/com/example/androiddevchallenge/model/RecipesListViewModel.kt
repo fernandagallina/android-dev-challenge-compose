@@ -16,10 +16,10 @@ class RecipesListViewModel : ViewModel() {
 
     fun initListener(lifecycleOwner: LifecycleOwner) {
         _list.observe(lifecycleOwner) {
-            _price.value = getRecipesPrice(list.value)
+            updateRecipePrice()
         }
         _color.observe(lifecycleOwner) {
-            _price.value = getRecipesPrice(list.value)
+            updateRecipePrice()
         }
     }
 
@@ -61,8 +61,13 @@ class RecipesListViewModel : ViewModel() {
     }
 
     private fun getNewRecipeColor() =
-        if(_color.value == Color.Unspecified)
+        if (_color.value == Color.Unspecified)
             RecipesDataGenerator.randomColor
         else
             _color.value ?: RecipesDataGenerator.randomColor
+
+    private fun updateRecipePrice(){
+        val newRecipePrice = getRecipesPrice(list.value)
+        _price.value = newRecipePrice
+    }
 }
