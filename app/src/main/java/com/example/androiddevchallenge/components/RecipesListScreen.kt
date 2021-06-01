@@ -204,17 +204,14 @@ fun RecipeCard(recipe: Recipe, onLongClick: () -> Unit = {}, onSwiped: () -> Uni
             .draggable(
                 state = rememberDraggableState {
                     offsetX += it
-                    Log.d("RecipeCard", "DraggableState it = $it")
                 },
                 orientation = Orientation.Horizontal,
                 onDragStopped = {
-                    if (abs(offsetX) < 100) {
+                    if (abs(offsetX) < 500) {
                         offsetX = 0f
                     } else {
                         onSwiped.invoke()
                     }
-
-                    Log.d("RecipeCard", "onDragStopped stop - offset $offsetX")
                 }
             )
     ) {
