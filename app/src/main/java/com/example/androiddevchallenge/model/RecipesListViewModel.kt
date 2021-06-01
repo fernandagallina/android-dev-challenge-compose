@@ -1,6 +1,6 @@
 package com.example.androiddevchallenge.model
 
-import android.graphics.Color
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.*
 
 class RecipesListViewModel : ViewModel() {
@@ -11,8 +11,8 @@ class RecipesListViewModel : ViewModel() {
     private val _price = MutableLiveData<Double>(getRecipesPrice(list.value))
     val price: LiveData<Double> = _price
 
-    // getting data to display on the UI from the data source
-    // val recipesList = RecipesDataGenerator.generateRecipes(10)
+    private val _color = MutableLiveData(Color.Unspecified)
+    val color: LiveData<Color> = _color
 
     fun initListener(lifecycleOwner: LifecycleOwner){
         _list.observe(lifecycleOwner){
@@ -20,8 +20,8 @@ class RecipesListViewModel : ViewModel() {
         }
     }
 
-    fun filterRecipe(color: Color) {
-
+    fun setColor(color: Color) {
+        _color.value = color
     }
 
     fun addRecipe(){
